@@ -1,0 +1,1382 @@
+const arrayEqual = function(a1, a2) {
+    if (a1.length() != a2.length()) {
+        return false 
+    }
+    var i = 0
+    while (i <= a1.length() - 1) {
+        var n1 = a1[i]
+        var n2 = a2[i]
+        if (n1 != n2) {
+            return false
+        }
+        i += 1
+    }
+    return true
+}
+
+const strip = function(s) {
+    var r = ''
+    var l = s.length()
+    var number_left = 0
+    var number_right = 0
+    
+    var i = 0
+    while (i < l) {
+        var char = s[i]
+        if (char != ' ') {
+            break
+        }
+        i += 1
+    }
+    number_left = i
+    
+    var j = l - 1
+    while (j > -1) {
+        var char = s[j]
+        if (char != ' ') {
+            break
+        }
+        j -= 1
+    }
+    number_right = j
+    return s.cut(number_left, number_right + 1)
+}
+
+const ensure = function(condition, message) {
+    // 在条件不成立的时候, 输出 message
+    if (condition == false) {
+        log('*** 测试失败:', message)
+    } else {
+        log('*** 测试成功')
+    }
+}
+
+const isDigit = function(c) {
+    return '0123456789'.find(c) > -1
+}
+
+const isBinaryNumber = function(s) {
+    // 必须以 0b 开头
+    // 否则十进制的 10 会被判断为二进制的 2
+    if (s.cut(0, 2) == '0b') {
+        var i = 2
+        while (i < s.length()) {
+            var c = s[i]
+            if (c != '0' and c != '1') {
+                return false 
+            }
+            i += 1
+        }
+        return true
+    }
+    return false
+}
+
+const isNumber = function(s) {
+    // 二进制数字串
+    if (isBinaryNumber(s)) {
+        return true
+    }
+    var i = 0
+    while (i < s.length()) {
+        var c = s[i]
+        if (isDigit(c) == false) {
+            return false 
+        }
+        i += 1
+    }
+    return true
+}
+
+// 二进制数字转换为十进制数字
+const binaryToInt = function(s) {
+    if (s.cut(0, 2) == '0b') {
+        s = s.cut(2)
+    }
+    var weight = 1
+    var res = 0
+    for (var i = s.length() - 1; i >= 0; i -= 1) {
+        var c = s[i]
+        if (c == '1') {
+            res += weight
+        }
+        weight *= 2
+    }
+    return res
+}
+
+const isLetter = function(c) {
+    return 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(c) > -1
+}
+
+const isUppercase = function(c) {
+    return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.find(c) > -1
+}
+
+const isLowercase = function(c) {
+    return 'abcdefghijklmnopqrstuvwxyz'.find(c) > -1
+}
+
+const isWord = function(s) {
+    var i = 0
+    while (i < s.length()) {
+        var c = s[i]
+        if (isLetter(c) == false) {
+            return false 
+        }
+        i += 1
+    }
+    return true
+}
+
+// 把字符串转换为数字
+const parseInt = function (s) {
+    var i = 0
+    var n = 0
+    while (i < s.length()) {
+        var integer = '0123456789'.find(s[i])
+        n = n * 10 + integer
+        i += 1
+    }
+    return n
+}
+
+// 数字和字符的对应关系
+const char_encode = function() {
+    var encode = {
+        '\'A\'': 1,
+        '\'B\'': 2,
+        '\'C\'': 3,
+        '\'D\'': 4,
+        '\'E\'': 5,
+        '\'F\'': 6,
+        '\'G\'': 7,
+        '\'H\'': 8,
+        '\'I\'': 9,
+        '\'J\'': 10,
+        '\'K\'': 11,
+        '\'L\'': 12,
+        '\'M\'': 13,
+        '\'N\'': 14,
+        '\'O\'': 15,
+        '\'P\'': 16,
+        '\'Q\'': 17,
+        '\'R\'': 18,
+        '\'S\'': 19,
+        '\'T\'': 20,
+        '\'U\'': 21,
+        '\'V\'': 22,
+        '\'W\'': 23,
+        '\'X\'': 24,
+        '\'Y\'': 25,
+        '\'Z\'': 26,
+        '\'a\'': 27,
+        '\'b\'': 28,
+        '\'c\'': 29,
+        '\'d\'': 30,
+        '\'e\'': 31,
+        '\'f\'': 32,
+        '\'g\'': 33,
+        '\'h\'': 34,
+        '\'i\'': 35,
+        '\'j\'': 36,
+        '\'k\'': 37,
+        '\'l\'': 38,
+        '\'m\'': 39,
+        '\'n\'': 40,
+        '\'o\'': 41,
+        '\'p\'': 42,
+        '\'q\'': 43,
+        '\'r\'': 44,
+        '\'s\'': 45,
+        '\'t\'': 46,
+        '\'u\'': 47,
+        '\'v\'': 48,
+        '\'w\'': 49,
+        '\'x\'': 50,
+        '\'y\'': 51,
+        '\'z\'': 52,
+        '\'0\'': 53,
+        '\'1\'': 54,
+        '\'2\'': 55,
+        '\'3\'': 56,
+        '\'4\'': 57,
+        '\'5\'': 58,
+        '\'6\'': 59,
+        '\'7\'': 60,
+        '\'8\'': 61,
+        '\'9\'': 62,
+        '\'$\'': 63,
+        '\'?\'': 64,
+        '\'!\'': 65,
+        '\'\\\'': 66 
+        '\'\'\'': 67,
+        '\'"\'': 68,
+        '\'[\'': 69,
+        '\']\'': 70,
+        '\'.\'': 71,
+        '\',\'': 72,
+        '\':\'': 73,
+        '\';\'': 74,
+        '\'(\'': 75,
+        '\')\'': 76,
+        '\'<\'': 77,
+        '\'>\'': 78,
+        '\'^\'': 79,
+        '\'/\'': 80,
+        '\'&\'': 81,
+        '\'*\'': 82,
+        '\'+\'': 83,
+        '\'-\'': 84,
+        '\'=\'': 85,
+        '\'_\'': 86,
+        '\' \'': 87,
+    }
+    return encode
+}
+
+// 根据变量是 1 2 字节 选择对应的 load 指令
+const loadFromRegister = function(b) {
+    if (b == 1) {
+        // load_from_register
+        return 13
+    } else {
+        // load_from_register2
+        return 14
+    }
+}
+
+const saveFromRegister = function(b) {
+    if (b == 1) {
+        // save_from_register
+        return 7
+    } else {
+        // save_from_register2
+        return 15
+    }
+}
+
+const register_mapper = function() {
+    var regs = {
+        pa: 0b00000000,
+        a1: 0b00010000,
+        a2: 0b00100000,
+        a3: 0b00110000,
+        f1: 0b01010000,
+        c1: 0b01000000,
+    }
+    return regs
+}
+
+// 获取一个数字的低 8 位
+const getNumberLow = function(n) {
+    var low = n & 255
+    return low
+}
+
+// 获取一个数字的高 8 位
+const getNumberHigh = function(n) {
+    var high = n >> 8
+    return high
+}
+
+const getMemoryLow = function(memory) {
+    // 两种地址格式
+    // @label
+    // @65536
+    var m = memory.cut(1)
+    var low = 0
+    if (isNumber(m)) {
+        low = getNumberLow(int(m))
+    } else {
+        low = m
+    }
+    return low
+}
+
+const getMemoryHigh = function(memory) {
+    // 两种地址格式
+    // @label
+    // @65536
+    var m = memory.cut(1)
+    var high = 0
+    if (isNumber(m)) {
+        high = getNumberHigh(int(m))
+    }
+    return high
+}
+
+const machine_code = function(asm) {
+    // memory 是内存，建立起来存放机器码
+    var memory = []
+    var offset = 0
+    // 存放内存地址
+    var label_address = {}
+    // 分割多行指令
+    var lines = asm.split("\n")
+    // 拿到寄存器 map
+    var regs = register_mapper()
+    // 存局部变量的偏移量
+    var localOffset = 0
+    var variable_offset = {}  // 存储局部变量的偏移量
+    var variable_type = {}  // 存储变量类型: 1字节/2字节
+    var function_signature = {}
+    var charEncode = char_encode()
+    // 用于标记 @while_start_globalIndexWhile
+    var globalIndexWhile = 0
+    var globalIndexIf = 0
+    // 用于实现嵌套 if while
+    var whileStack = []  // whileStack = [['@while_start_1', '@while_end_1']]
+    var ifStack = []
+    var scope = []  // 当前处于 scope = ['if', 'while'] 最后一个元素的作用域
+    // 第一轮循环 获取函数签名
+    for (var i = 0; i <= lines.length() - 1; i += 1) {
+        var line = strip(lines[i])
+        // 跳过空行
+        if (line == '') {
+            continue
+        }
+        var code = line.split(" ")
+        // 定义操作符
+        var op = code[0]
+        // 处理函数签名
+        if (op == '.function') {
+            var functionName = code[1].split(':')[0]
+            var returnByte = int(code[1].split(':')[1])
+            var argumentNumber = 0
+            var argumentByte = []
+            var argumentName = []
+            for (var j = 2; j < code.length(); j += 1) {
+                argumentNumber += 1
+                argumentName.add(code[j].split(':')[0])
+                argumentByte.add(int(code[j].split(':')[1]))
+            }
+            if (functionName in function_signature) {
+                log('function {} has already existed'.format(functionName))
+                return
+            }
+            function_signature[functionName] = {
+                'returnByte': returnByte,
+                'argumentNumber': argumentNumber,
+                'argumentByte': argumentByte,
+                'argumentName': argumentName,
+            }
+        } else if (op == '.import') {
+            // 把函数 imoprt 到当前位置
+            var file = code[1]
+            var s = stringFromFile(file)
+
+            var newLines = s.split("\n")
+            var prev = lines.cut(0, i)
+            var next = lines.cut(i + 1)
+
+            prev.extend(newLines)
+            prev.extend(next)
+            lines = prev
+            // 因为 .import 被删掉了
+            i -= 1
+        }
+    }
+    // for (i, e in function_signature) {
+    //     log(i, e)
+    // }
+    // 第二轮循环 将指令翻译成机器码
+    var i = 0
+    while (i <= lines.length() - 1) {
+        // 将指令分割成数组
+        var line = strip(lines[i])
+        // 跳过空行
+        if (line == '') {
+            i += 1
+            continue
+        }
+        var code = line.split(" ")
+        // 定义操作符
+        var op = code[0]
+        // log(op)
+        // log(offset, op)
+        if (op == 'compare') {
+            offset += 3
+            var r1 = code[1]
+            var r2 = code[2]
+            r1 = regs[r1]
+            r2 = regs[r2]
+            memory.add(4)
+            memory.add(r1)
+            memory.add(r2)
+        } else if (op == 'jump_if_less') {
+            offset += 3
+            var low = getMemoryLow(code[1])
+            var high = getMemoryHigh(code[1])
+            memory.add(5)
+            memory.add(low)
+            memory.add(high)
+        } else if (op == 'jump') {
+            offset += 3
+            var low = getMemoryLow(code[1])
+            var high = getMemoryHigh(code[1])
+            memory.add(6)
+            memory.add(low)
+            memory.add(high)
+        } else if (op == 'save_from_register') {
+            offset += 3
+            var r1 = code[1]
+            var r2 = code[2]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+
+            memory.add(7)
+            memory.add(r1)
+            memory.add(r2)
+        } else if (op == 'set2') {
+            offset += 4
+            var reg = code[1]
+            reg = regs[reg]
+            var low = getNumberLow(int(code[2]))
+            var high = getNumberHigh(int(code[2]))
+            memory.add(8)
+            memory.add(reg)
+            memory.add(low)
+            memory.add(high)
+        } else if (op == 'load2') {
+            offset += 4
+            var reg = code[2]
+            reg = regs[reg]
+            var low = getMemoryLow(code[1])
+            var high = getMemoryHigh(code[1])
+            memory.add(9)
+            memory.add(low)
+            memory.add(high)
+            memory.add(reg)
+        } else if (op == 'add2') {
+            offset += 4
+            var r1 = code[1]
+            var r2 = code[2]
+            var r3 = code[3]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+            r3 = regs[r3]
+
+            memory.add(10)
+            memory.add(r1)
+            memory.add(r2)
+            memory.add(r3)
+        } else if (op == 'save2') {
+            offset += 4
+            var reg = code[1]
+            reg = regs[reg]
+            var low = getMemoryLow(code[2])
+            var high = getMemoryHigh(code[2])
+            memory.add(11)
+            memory.add(reg)
+            memory.add(low)
+            memory.add(high)
+        } else if (op == 'subtract2') {
+            offset += 4
+            var r1 = code[1]
+            var r2 = code[2]
+            var r3 = code[3]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+            r3 = regs[r3]
+
+            memory.add(12)
+            memory.add(r1)
+            memory.add(r2)
+            memory.add(r3)
+        } else if (op == 'load_from_register') {
+            offset += 3
+            var r1 = code[1]
+            var r2 = code[2]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+
+            memory.add(13)
+            memory.add(r1)
+            memory.add(r2)
+        } else if (op == 'load_from_register2') {
+            offset += 3
+            var r1 = code[1]
+            var r2 = code[2]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+
+            memory.add(14)
+            memory.add(r1)
+            memory.add(r2)
+        } else if (op == 'save_from_register2') {
+            offset += 3
+            var r1 = code[1]
+            var r2 = code[2]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+            
+            memory.add(15)
+            memory.add(r1)
+            memory.add(r2)
+        } else if (op == 'jump_from_register') {
+            offset += 2
+            var reg = code[1]
+            reg = regs[reg]
+            memory.add(16)
+            memory.add(reg)
+        } else if (op == 'shift_right') {
+            offset += 4
+            var r1 = code[1]
+            var r2 = code[2]
+            var r3 = code[3]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+            r3 = regs[r3]
+
+            memory.add(17)
+            memory.add(r1)
+            memory.add(r2)
+            memory.add(r3)
+        } else if (op == 'and') {
+            offset += 4
+            var r1 = code[1]
+            var r2 = code[2]
+            var r3 = code[3]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+            r3 = regs[r3]
+
+            memory.add(19)
+            memory.add(r1)
+            memory.add(r2)
+            memory.add(r3)
+        } else if (op == 'multiply2') {
+            offset += 4
+            var r1 = code[1]
+            var r2 = code[2]
+            var r3 = code[3]
+
+            r1 = regs[r1]
+            r2 = regs[r2]
+            r3 = regs[r3]
+
+            memory.add(20)
+            memory.add(r1)
+            memory.add(r2)
+            memory.add(r3)
+        } else if (op == 'jump_if_equal') {
+            offset += 3
+            var low = getMemoryLow(code[1])
+            var high = getMemoryHigh(code[1])
+            memory.add(21)
+            memory.add(low)
+            memory.add(high)
+        } else if (op == 'halt') {
+            offset += 1
+            localOffset = 0
+            variable_offset = {}
+            variable_type = {}
+            memory.add(255)
+        } else if (op[0] == '@') {
+            // 处理 label  
+            label_address[op.cut(1)] = offset
+        } else if (op[0] == '}') {
+            // 为 .while .if .else 语句加上尾部指令
+            // 需要判断当前和 } 匹配的是哪一个 @start
+            var key = scope.cut(-1)[0]
+            scope = scope.cut(0, scope.length() - 1)
+
+            if (key == 'while') {
+                var tag = whileStack.cut(-1)[0]
+                var while_start = tag[0]
+                var while_end = tag[1]
+                var pseudo = [
+                    // jump @while_start
+                    6, getMemoryLow(while_start), getMemoryHigh(while_start),
+                ]
+                memory.extend(pseudo)
+                offset += pseudo.length()
+                // 标记 @while_end 的偏移地址
+                label_address[while_end.cut(1)] = offset
+                // 删掉最后一对地址 因为已经离开作用域了
+                whileStack = whileStack.cut(0, whileStack.length() - 1)
+            } else if (key == 'if') {
+                var tag = ifStack.cut(-1)[0]
+                var if_start = tag[0]
+                var if_else = tag[1]
+                var if_end = tag[2]
+                // jump @if_end_0 ; @if_body 结尾的指令
+                var pseudo = [
+                    6, getMemoryLow(if_end), getMemoryHigh(if_end),
+                ]
+                memory.extend(pseudo)
+                offset += pseudo.length()
+                label_address[if_else.cut(1)] = offset
+
+                if (code.length() == 1) {
+                    // 没有 else 语句, @if_else 和 @if_end 重合
+                    label_address[if_end.cut(1)] = offset
+                    ifStack = ifStack.cut(0, ifStack.length() - 1)
+                } else {
+                    scope.add('else')
+                }
+            } else if (key == 'else') {
+                var tag = ifStack.cut(-1)[0]
+                var if_end = tag[2]
+                label_address[if_end.cut(1)] = offset
+                ifStack = ifStack.cut(0, ifStack.length() - 1)
+            }
+        } else if (op == '.function') {
+            // 记录函数的地址
+            var funcName = code[1].split(':')[0]
+            label_address[funcName] = offset
+
+            // 获取函数的参数 声明局部变量
+            var argumentNumber =  function_signature[funcName]['argumentNumber']
+            var argumentByte = function_signature[funcName]['argumentByte']
+            var argumentName = function_signature[funcName]['argumentName']
+            var pseudo = []
+
+            for (var k = 0; k < argumentNumber; k += 1) {
+                var type = argumentByte[k]
+                var variable = argumentName[k]
+                /*
+                set2 a3 type
+                add2 f1 a3 f1
+                */
+                var pushStack = [
+                    8, 48, type, 0,
+                    10, 80, 48, 80,
+                ]
+                pseudo.extend(pushStack)
+                variable_offset[variable] = localOffset
+                variable_type[variable] = type
+                localOffset += type
+            }
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.function_end') {
+            // 把局部变量清空
+            localOffset = 0
+            variable_offset = {}
+            variable_type = {}
+        } else if (op == '.memory') {
+            // 扩充内存
+            var len = int(code[1]) - memory.length()
+            offset += len
+            for (var i = 0; i < len; i += 1) {
+                memory.add(0)
+            }
+        } else if (op == '.call') {
+            // 函数调用
+            // 要根据函数签名的参数列表来确定
+            var funcName = code[1]
+            var argumentNumber =  function_signature[funcName]['argumentNumber']
+            var argumentByte = function_signature[funcName]['argumentByte']
+            var accumulateByte = 0
+            var pseudo = []
+
+            for (var k = 0; k < argumentNumber; k += 1) {
+                var actualParamether = code[2 + k]
+                var type = argumentByte[k]
+                var pushStack = []
+
+                if (isNumber(actualParamether)) {
+                    var low = getNumberLow(int(actualParamether))
+                    var high = getNumberHigh(int(actualParamether))
+                    /*
+                    set2 a1 parameter
+                    
+                    set2 a3 2+accumulateByte
+                    add2 f1 a3 a3
+                    save_from_register a1 a3
+                    */
+                    pushStack = [
+                        8, 16, low, high,
+                        8, 48, 2 + accumulateByte, 0,
+                        10, 80, 48, 48,
+                        saveFromRegister(type), 16, 48,
+                    ]
+                } else if (actualParamether in charEncode) {
+                    // draw char
+                    // log('draw {}'.format(actualParamether))
+                    var order = charEncode[actualParamether]
+                    var low = getNumberLow(order)
+                    var high = getNumberHigh(order)
+                    pushStack = [
+                        8, 16, low, high,
+                        8, 48, 2 + accumulateByte, 0,
+                        10, 80, 48, 48,
+                        saveFromRegister(type), 16, 48,
+                    ]
+                } else {
+                    if (actualParamether[0] == '&') {
+                        // &s 传地址
+                        actualParamether = actualParamether.cut(1)
+                        var low = getNumberLow(localOffset - variable_offset[actualParamether])
+                        var high = getNumberHigh(localOffset - variable_offset[actualParamether])
+                        pushStack = [
+                            /*
+                            set2 a3 offset
+                            subtract2 f1 a3 a1
+
+                            set2 a3 2+accumulateByte
+                            add2 f1 a3 a3
+                            save_from_register a1 a3
+                            */
+                            8, 48, low, high,
+                            12, 80, 48, 16,
+
+                            8, 48, 2 + accumulateByte, 0,
+                            10, 80, 48, 48,
+                            saveFromRegister(type), 16, 48,
+                        ]
+                    } else {
+                        var low = getNumberLow(localOffset - variable_offset[actualParamether])
+                        var high = getNumberHigh(localOffset - variable_offset[actualParamether])
+                        pushStack = [
+                            /*
+                            set2 a3 offset
+                            subtract2 f1 a3 a3
+                            load_from_register a3 a1
+                            */
+                            8, 48, low, 0,
+                            12, 80, 48, 48,
+                            loadFromRegister(type), 48, 16,
+
+                            /*
+                            set2 a3 offset
+                            add2 f1 a3 a3
+                            save_from_register a1 a3
+                            */
+                            8, 48, 2 + accumulateByte, 0,
+                            10, 80, 48, 48,
+                            saveFromRegister(type), 16, 48,
+                        ]
+                    }
+                }
+                pseudo.extend(pushStack)
+                accumulateByte += type
+            }
+            /*
+            存储返回地址 memory[f1] = pa + 14
+            set2 a3 14
+            add2 pa a3 a3
+            save_from_register2 a3 f1
+            set2 a3 2
+            add2 f1 a3 f1
+            jump @function
+            */
+            var low = funcName
+            var returnAddress = [
+                8, 48, 14, 0,
+                10, 0, 48, 48,
+                15, 48, 80,
+                8, 48, 2, 0,
+                10, 80, 48, 80,
+                6, low, 0,
+            ]
+            pseudo.extend(returnAddress)
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.return') {
+            /*
+            两种格式：
+            .return
+            .return c
+            */
+            if (code.length() > 1 and isWord(code[1])) {
+                /*
+                把返回值存到 a1 中
+                set2 a3 variable_offset
+                subtract2 f1 a3 a3
+                load_from_register2 a3 a1
+                
+                把返回地址存到 a2 中
+                set2 a3 localOffset+2
+                subtract2 f1 a3 f1
+                load_from_register2 f1 a2
+                jump_from_register a2
+                */
+                var variable = code[1]
+                var low1 = getNumberLow(localOffset - variable_offset[variable])
+                var high1 = getNumberHigh(localOffset - variable_offset[variable])
+                var low2 = getNumberLow(localOffset + 2)
+                var high2 = getNumberHigh(localOffset + 2)
+                var type = variable_type[variable]
+
+                var pseudo =[
+                    8, 48, low1, high1,
+                    12, 80, 48, 48,
+                    loadFromRegister(type), 48, 16,
+
+                    8, 48, low2, high2,
+                    12, 80, 48, 80,
+                    14, 80, 32,
+                    16, 32,
+                ]
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            } else {
+               /*
+                set2 a3 localOffset+2
+                subtract2 f1 a3 f1
+                load_from_register2 f1 a2
+                jump_from_register a2
+               */
+               var low = getNumberLow(localOffset + 2)
+               var high = getNumberHigh(localOffset + 2)
+               var pseudo =[
+                    8, 48, low, high,
+                    12, 80, 48, 80,
+                    14, 80, 32,
+                    16, 32,
+                ]
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            }
+            // localOffset = 0
+            // variable_offset = {}
+            // variable_type = {}
+        } else if (op == '.var') {
+            // 声明单字节变量
+            var variable = code[1]
+            variable_offset[variable] = localOffset
+            variable_type[variable] = 1
+            localOffset += 1
+            if (code.length() > 2) {
+                // .var2 column 0b10011100
+                // 虽然 column 参数占用了 2 个字节, 但只需要用到这个变量的低 8 位
+                var low = 0
+                var pseudo = []
+                var n = code[2]
+                if (isNumber(code[2])) {
+                    if (isBinaryNumber(n)) low = getNumberLow(binaryToInt(n))
+                    else low = getNumberLow(int(n))
+                    /*
+                    声明局部变量并赋初始值
+                    value->memory[f1]
+                    f1 = f1 + 1
+
+                    set2 a1 value
+                    save_from_register a1 f1
+                    set2 a3 1
+                    add2 f1 a3 f1
+                    */ 
+                    pseudo =[
+                        8, 16, low, 0,
+                        7, 16, 80,
+                        8, 48, 1, 0,
+                        10, 80, 48, 80,
+                    ]
+                } else {
+                    // .var 'A'
+                    low = getNumberLow(charEncode[n])
+                    /*
+                    set2 a3 char
+                    save_from_register a3 f1
+                    set2 a3 1
+                    add2 f1 a3 f1
+                    */
+                    pseudo = [
+                        8, 48, low, 0, 
+                        7, 48, 80,
+                        8, 48, 1, 0,
+                        10, 80, 48, 80,
+                    ]
+                }
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            } else {
+                /*
+                声明局部变量, 不赋初值
+                set2 a3 1
+                add2 f1 a3 f1
+                */
+                var pseudo =[
+                    8, 48, 1, 0,
+                    10, 80, 48, 80,
+                ]
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            }
+        } else if (op == '.var2') {
+            // 没有处理注释
+            var variable = code[1]
+            variable_offset[variable] = localOffset
+            if (code.length() > 2) {
+                var pseudo = []
+                variable_type[variable] = 2
+                localOffset += 2
+                /*
+                声明局部变量并赋初始值
+                value->memory[f1]
+                f1 = f1 + 2
+
+                set2 a1 value
+                save_from_register2 a1 f1
+                set2 a3 2
+                add2 f1 a3 f1
+                */
+            
+                // .var2 column 0b10011100
+                // 虽然 column 参数占用了 2 个字节, 但只需要用到这个变量的低 8 位
+                var val = 0
+                var low = 0
+                var high = 0
+                var n = code[2]
+                if (isBinaryNumber(n)) {
+                    // 二进制 -> 十进制 -> 小端
+                    var decimal = binaryToInt(n)
+                    low = getNumberLow(decimal)
+                    high = getNumberHigh(decimal)
+                } else {
+                    // 字符串 -> 十进制 -> 小端
+                    low = getNumberLow(int(n))
+                    high = getNumberHigh(int(n))
+                }
+                pseudo = [
+                    8, 16, low, high,
+                    15, 16, 80,
+                    8, 48, 2, 0,
+                    10, 80, 48, 80,
+                ]
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            } else {
+                variable_type[variable] = 2
+                localOffset += 2
+                // 声明局部变量, 不赋初值
+                /*
+                set2 a3 2
+                add2 f1 a3 f1
+                */
+                var pseudo =[
+                    8, 48, 2, 0,
+                    10, 80, 48, 80,
+                ]
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            }
+        } else if (op == '.var-string') {
+            var variable = code[1]
+            variable_offset[variable] = localOffset
+            var pseudo = []
+
+            // 字符串
+            var s = ''
+            // 字符串里有空格 要用空格把它们拼接起来
+            for (var k = 2; k < code.length(); k += 1) {
+                s = s + code[k]
+                if (k < code.length() - 1) s += ' '
+            }
+            log(s)
+            s = s.cut(0, s.length()-1).cut(1)  // 切掉引号
+            variable_type[variable] = s.length() + 1
+            localOffset += s.length() + 1
+
+            for (var k = 0; k < s.length() + 1; k += 1) {
+                var low = 0
+                if (k == s.length()) {
+                    // 字符串结束标记
+                    low = 0
+                } else {
+                    var c = '\'' + s[k] + '\''
+                    low = getNumberLow(charEncode[c])
+                }
+                /*
+                set2 a3 char
+                save_from_register a3 f1
+                set2 a3 1
+                add2 f1 a3 f1
+                */
+                var newChar = [
+                    8, 48, low, 0, 
+                    7, 48, 80,
+                    8, 48, 1, 0,
+                    10, 80, 48, 80,
+                ]
+                pseudo.extend(newChar)
+            }
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.add2') {
+            // 要根据三个变量不同的offset去取值
+            var variable1 = code[1]
+            var variable2 = code[2]
+            var variable3 = code[3]
+
+            var low1 = getNumberLow(localOffset - variable_offset[variable1])
+            var low2 = getNumberLow(localOffset - variable_offset[variable2])
+            var low3 = getNumberLow(localOffset - variable_offset[variable3])
+            var high1 = getNumberHigh(localOffset - variable_offset[variable1])
+            var high2 = getNumberHigh(localOffset - variable_offset[variable2])
+            var high3 = getNumberHigh(localOffset - variable_offset[variable3])
+
+            var type1 = variable_type[variable1]
+            var type2 = variable_type[variable2]
+            var type3 = variable_type[variable3]
+
+            /*
+            set2 a3 offset1
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a1
+            
+            set2 a3 offset2
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a2
+            
+            add2 a1 a2 a1
+            
+            set2 a3 offset3
+            subtract2 f1 a3 a3
+            save_from_register2 a1 a3
+            */
+            var pseudo =[
+                8, 48, low1, high1,
+                12, 80, 48, 48,
+                loadFromRegister(type1), 48, 16,
+
+                8, 48, low2, high2,
+                12, 80, 48, 48,
+                loadFromRegister(type2), 48, 32,
+
+                10, 16, 32, 16,
+
+                8, 48, low3, high3,
+                12, 80, 48, 48,
+                saveFromRegister(type3), 16, 48,
+            ]
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.subtract2') {
+            // 要根据三个变量不同的offset去取值
+            var variable1 = code[1]
+            var variable2 = code[2]
+            var variable3 = code[3]
+
+            var low1 = getNumberLow(localOffset - variable_offset[variable1])
+            var low2 = getNumberLow(localOffset - variable_offset[variable2])
+            var low3 = getNumberLow(localOffset - variable_offset[variable3])
+            var high1 = getNumberHigh(localOffset - variable_offset[variable1])
+            var high2 = getNumberHigh(localOffset - variable_offset[variable2])
+            var high3 = getNumberHigh(localOffset - variable_offset[variable3])
+
+            var type1 = variable_type[variable1]
+            var type2 = variable_type[variable2]
+            var type3 = variable_type[variable3]
+
+            /*
+            set2 a3 offset1
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a1
+
+            set2 a3 offset2
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a2
+
+            subtract2 a1 a2 a1
+
+            set2 a3 offset3
+            subtract2 f1 a3 a3
+            save_from_register2 a1 a3
+            */
+            var pseudo =[
+                8, 48, low1, high1,
+                12, 80, 48, 48,
+                loadFromRegister(type1), 48, 16,
+
+                8, 48, low2, high2,
+                12, 80, 48, 48,
+                loadFromRegister(type2), 48, 32,
+
+                12, 16, 32, 16,
+
+                8, 48, low3, high3,
+                12, 80, 48, 48,
+                saveFromRegister(type3), 16, 48,
+            ]
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.multiply2') {
+            // 要根据三个变量不同的offset去取值
+            var variable1 = code[1]
+            var variable2 = code[2]
+            var variable3 = code[3]
+
+            var low1 = getNumberLow(localOffset - variable_offset[variable1])
+            var low2 = getNumberLow(localOffset - variable_offset[variable2])
+            var low3 = getNumberLow(localOffset - variable_offset[variable3])
+            var high1 = getNumberHigh(localOffset - variable_offset[variable1])
+            var high2 = getNumberHigh(localOffset - variable_offset[variable2])
+            var high3 = getNumberHigh(localOffset - variable_offset[variable3])
+
+            var type1 = variable_type[variable1]
+            var type2 = variable_type[variable2]
+            var type3 = variable_type[variable3]
+
+            /*
+            set2 a3 offset1
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a1
+
+            set2 a3 offset2
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a2
+
+            multiply2 a1 a2 a1
+
+            set2 a3 offset3
+            subtract2 f1 a3 a3
+            save_from_register2 a1 a3
+            */
+            var pseudo =[
+                8, 48, low1, high1,
+                12, 80, 48, 48,
+                loadFromRegister(type1), 48, 16,
+
+                8, 48, low2, high2,
+                12, 80, 48, 48,
+                loadFromRegister(type2), 48, 32,
+
+                20, 16, 32, 16,
+
+                8, 48, low3, high3,
+                12, 80, 48, 48,
+                saveFromRegister(type3), 16, 48,
+            ]
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.return_value') {
+            // .var2
+            var variable = code[1]
+            variable_offset[variable] = localOffset
+            variable_type[variable] = 2
+            localOffset += 2
+            /*
+            声明局部变量并赋初始值
+            a1->memory[f1]
+            f1 = f1 + 2
+
+            save_from_register2 a1 f1
+            set2 a3 2
+            add2 f1 a3 f1
+            */
+            var pseudo =[
+                15, 16, 80,
+                8, 48, 2, 0,
+                10, 80, 48, 80,
+            ]
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        } else if (op == '.while') {
+            var variable1 = code[1]
+            var variable2 = code[3]
+            var operation = code[2]
+
+            var while_start = '@while_start_' + globalIndexWhile
+            var while_body = '@while_body_' + globalIndexWhile
+            var while_end = '@while_end_' + globalIndexWhile
+            label_address[while_start.cut(1)] = offset
+            
+            // .compare
+            var low1 = getNumberLow(localOffset - variable_offset[variable1])
+            var low2 = getNumberLow(localOffset - variable_offset[variable2])
+            var high1 = getNumberHigh(localOffset - variable_offset[variable1])
+            var high2 = getNumberHigh(localOffset - variable_offset[variable2])
+
+            var type1 = variable_type[variable1]
+            var type2 = variable_type[variable2]
+
+            /*
+            set2 a3 offset1
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a1
+            
+            set2 a3 offset2
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a2
+            
+            compare a1 a2
+
+            jump_if_less/jump_if_equal @while_body
+            jump @while_end
+            */
+            var jumpType = -1
+            if (operation == '<') jumpType = 5
+            else if (operation == '==') jumpType = 21
+
+            var pseudo = [
+                8, 48, low1, high1,
+                12, 80, 48, 48,
+                loadFromRegister(type1), 48, 16,
+
+                8, 48, low2, high2,
+                12, 80, 48, 48,
+                loadFromRegister(type2), 48, 32,
+
+                4, 16, 32,
+
+                jumpType, getMemoryLow(while_body), getMemoryHigh(while_body),
+                6, getMemoryLow(while_end), getMemoryHigh(while_end),
+            ]
+            memory.extend(pseudo)
+            offset += pseudo.length()
+            label_address[while_body.cut(1)] = offset
+
+            whileStack.add([while_start, while_end])
+            globalIndexWhile += 1
+            scope.add('while')
+        } else if (op == '.if') {
+            var variable1 = code[1]
+            var variable2 = code[3]
+            var operation = code[2]
+
+            var if_start = '@if_start_' + globalIndexIf
+            var if_body = '@if_body_' + globalIndexIf
+            var if_else = '@if_else_' + globalIndexIf
+            var if_end = '@if_end_' + globalIndexIf
+            label_address[if_start.cut(1)] = offset
+            
+            var low1 = getNumberLow(localOffset - variable_offset[variable1])
+            var low2 = getNumberLow(localOffset - variable_offset[variable2])
+            var high1 = getNumberHigh(localOffset - variable_offset[variable1])
+            var high2 = getNumberHigh(localOffset - variable_offset[variable2])
+
+            var type1 = variable_type[variable1]
+            var type2 = variable_type[variable2]
+
+            /*
+            set2 a3 offset1
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a1
+            
+            set2 a3 offset2
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a2
+            
+            compare a1 a2
+
+            jump_if_less/jump_if_equal @if_body
+            jump @if_else
+            */
+            var jumpType = -1
+            if (operation == '<') jumpType = 5
+            else if (operation == '==') jumpType = 21
+
+            var pseudo = [
+                8, 48, low1, high1,
+                12, 80, 48, 48,
+                loadFromRegister(type1), 48, 16,
+
+                8, 48, low2, high2,
+                12, 80, 48, 48,
+                loadFromRegister(type2), 48, 32,
+
+                4, 16, 32,
+
+                jumpType, getMemoryLow(if_body), getMemoryHigh(if_body),
+                6, getMemoryLow(if_else), getMemoryHigh(if_else),
+            ]
+            memory.extend(pseudo)
+            offset += pseudo.length()
+            label_address[if_body.cut(1)] = offset
+
+            ifStack.add([if_start, if_else, if_end])
+            globalIndexIf += 1
+            scope.add('if')
+        } else if (op == '.log') {
+            if (code[1] in variable_offset) {
+                // 打印局部变量的值
+                var variable = code[1]
+                // var variableOffset = number_partition(localOffset - variable_offset[variable])
+                var low = getNumberLow(localOffset - variable_offset[variable])
+                var high = getNumberHigh(localOffset - variable_offset[variable])
+
+                var type = variable_type[variable]
+                /*
+                set2 a3 offset
+                subtract2 f1 a3 a3
+                load_from_register(v_op[0]) a3 a3
+
+                save2 a3 @65534
+                */
+                // var dest_mem = number_partition(65534)
+                var dest_mem_low = getNumberLow(65534)
+                var dest_mem_high = getNumberHigh(65534)
+                var reg = regs['a3']
+                var pseudo =[
+                    8, 48, low, high,
+                    12, 80, 48, 48,
+                    loadFromRegister(type), 48, 48,
+
+                    11, reg, dest_mem_low, dest_mem_high,
+                ]
+                offset += pseudo.length()
+                memory.extend(pseudo)
+            } else {
+                /*
+                打印寄存器中的值
+                save2 reg @65534
+                */
+                var reg = code[1]
+                reg = regs[reg]
+                // var val = number_partition(65534)
+                var low = getNumberLow(65534)
+                var high = getNumberHigh(65534)
+                var pseudo =[
+                    11, reg, low, high,
+                ]
+                offset += 4
+                memory.extend(pseudo)
+            }
+        } else if (op == '.print') {
+            // 打印局部变量的值
+            var variable = code[1]
+            var low = getNumberLow(localOffset - variable_offset[variable])
+            var high = getNumberHigh(localOffset - variable_offset[variable])
+
+            var type = variable_type[variable]
+            /*
+            set2 a3 offset
+            subtract2 f1 a3 a3
+            load_from_register(v_op[0]) a3 a3
+
+            save2 a3 @65534
+            */
+            var dest_mem_low = getNumberLow(65534)
+            var dest_mem_high = getNumberHigh(65534)
+            var reg = regs['a3']
+            var pseudo =[
+                8, 48, low, high,
+                12, 80, 48, 48,
+                loadFromRegister(type), 48, 48,
+
+                11, reg, dest_mem_low, dest_mem_high,
+            ]
+            offset += pseudo.length()
+            memory.extend(pseudo)
+        }
+        i += 1
+    }
+    // log(label_address)
+    var j = 0
+    // 处理函数/跳转的地址
+    while (j < memory.length()) {
+        var e = memory[j]
+        if (type(e) == type('')) {
+            // log(e)
+            // var mem = number_partition(label_address[e])
+            var low = getNumberLow(label_address[e])
+            var high = getNumberHigh(label_address[e])
+            memory[j] = low
+            memory[j + 1] = high
+        }
+        j += 1
+    }
+    return memory
+}

@@ -1,0 +1,24 @@
+jump @1024
+.memory 1024
+
+set2 f1 3
+jump @__main
+
+.import stringlib8.a16
+
+.function __main:0
+    .var-string s1 "axe"
+    .call find &s1 'a'
+    .return_value index
+    .call ensureEqual index 0 111
+    halt
+.function_end
+
+.function ensureEqual:0 a:2 b:2 msg:2
+    .if a == b {
+        .return
+    } .else {
+        .print msg
+        halt
+    }
+.function_end

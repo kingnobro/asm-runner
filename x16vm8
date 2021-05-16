@@ -1,0 +1,438 @@
+const asm = import("x16asm8")
+const font = import("fonts")
+const config = {
+    pixelSize: 5,
+}
+
+// 找到字符 c 在内存中的编码位置
+const char_mapper = function() {
+    var chars = {
+        'A': 65024,
+        'B': 65028,
+        'C': 65032,
+        'D': 65036,
+        'E': 65040,
+        'F': 65044,
+        'G': 65048,
+        'H': 65052,
+        'I': 65056,
+        'J': 65060,
+        'K': 65064,
+        'L': 65068,
+        'M': 65072,
+        'N': 65076,
+        'O': 65080,
+        'P': 65084,
+        'Q': 65088,
+        'R': 65092,
+        'S': 65096,
+        'T': 65100,
+        'U': 65104,
+        'V': 65108,
+        'W': 65112,
+        'X': 65116,
+        'Y': 65120,
+        'Z': 65124,
+        'a': 65128,
+        'b': 65132,
+        'c': 65136,
+        'd': 65140,
+        'e': 65144,
+        'f': 65148,
+        'g': 65152,
+        'h': 65156,
+        'i': 65160,
+        'j': 65164,
+        'k': 65168,
+        'l': 65172,
+        'm': 65176,
+        'n': 65180,
+        'o': 65184,
+        'p': 65188,
+        'q': 65192,
+        'r': 65196,
+        's': 65200,
+        't': 65204,
+        'u': 65208,
+        'v': 65212,
+        'w': 65216,
+        'x': 65220,
+        'y': 65224,
+        'z': 65228,
+        '0': 65232,
+        '1': 65236,
+        '2': 65240,
+        '3': 65244,
+        '4': 65248,
+        '5': 65252,
+        '6': 65256,
+        '7': 65260,
+        '8': 65264,
+        '9': 65268,
+        '$': 65272,
+        '?': 65276,
+        '!': 65280,
+        '\\': 65284
+        '\'': 65288,
+        '"': 65292,
+        '[': 65296,
+        ']': 65300,
+        '.': 65304,
+        ',': 65308,
+        ':': 65312,
+        ';': 65316,
+        '(': 65320,
+        ')': 65324,
+        '<': 65328,
+        '>': 65332,
+        '^': 65336,
+        '/': 65340,
+        '&': 65344,
+        '*': 65348,
+        '+': 65352,
+        '-': 65356,
+        '=': 65360,
+        '_': 65364,
+        ' ': 65368,
+    }
+    return chars
+}
+
+const AxePU = class() {
+    const new = function(memory) {
+        // 用 this.变量名 来创造一个只有类的实例才能访问的变量
+        // 定义实例变量的时候必须用 var 或 const 来修饰
+        var len = memory.length()
+        for (var i = 0; i < (65536 - len); i += 1) {
+            memory.add(0)
+        }
+        // 编码 从 0xFE 开始存
+        // 每个字符图案占 4 个字节
+        var fonts = font.fonts
+        var chars = char_mapper()
+        for (c, p in chars) {
+            var columns = fonts[c]
+            for (var k = 0; k < 4; k += 1) {
+                memory[p + k] = columns[k]
+            }
+        }
+
+        var this.memory = memory
+        var this.regs = {
+            pa: 0,
+            a1: 0,
+            a2: 0,
+            a3: 0,
+            c1: 0,
+            f1: 0,
+        }
+        var this.regID = {
+            '0': 'pa',
+            '16': 'a1',
+            '32': 'a2',
+            '48': 'a3',
+            '80': 'f1',
+            '128': 'c1',
+        }
+        var this.instruction = {
+            'set': 0,
+            'load': 1,
+            'add': 2,
+            'save': 3,
+            'compare': 4,
+            'jump_if_less': 5,
+            'jump': 6,
+            'save_from_register': 7,
+            'set2': 8,
+            'load2': 9,
+            'add2': 10,
+            'save2': 11,
+            'subtract2': 12,
+            'load_from_register': 13,
+            'load_from_register2': 14,
+            'save_from_register2': 15,
+            'jump_from_register': 16,
+            'shift_right': 17,
+            'and': 19,
+            'multiply2': 20,
+            'jump_if_equal': 21,
+            'halt': 255,
+        }
+    }
+
+    // 通过数字反查寄存器
+    const set_register = function(reg, val) {
+        if (reg == 0) {
+            this.regs['pa'] = val
+        } else if (reg == 16) {
+            this.regs['a1'] = val
+        } else if (reg == 32) {
+            this.regs['a2'] = val
+        } else if (reg == 48) {
+            this.regs['a3'] = val
+        } else if (reg == 64) {
+            this.regs['c1'] = val
+        } else if (reg == 80) {
+            this.regs['f1'] = val
+        }
+    }
+
+    // 将小端表示的数字拼接起来
+    const concat_number = function(low, high) {
+        return low + (high << 8)
+    }
+
+    // 根据寄存器的编号返回对应的值
+    const register = function(reg) {
+        if (reg == 0) {
+            return this.regs['pa']
+        } else if (reg == 16) {
+            return this.regs['a1']
+        } else if (reg == 32) {
+            return this.regs['a2']
+        } else if (reg == 48) {
+            return this.regs['a3']
+        } else if (reg == 64) {
+            return this.regs['c1']
+        } else if (reg == 80) {
+            return this.regs['f1']
+        }
+    }
+
+    const pa_plus = function(step) {
+        this.regs['pa'] += step
+    }
+
+    // 这是一个虚拟机程序
+    // run 函数将 memory 数组视为内存，并且以地址 0 为起点执行这个内存
+    // 需要用变量来模拟寄存器，读取指令模拟程序的执行
+    const run = function() {
+        while (true) {
+            pa = this.regs['pa']
+            op = this.memory[pa]
+            // log(pa)
+            // log(op)
+            if (op == this.instruction['halt']) {
+                return
+            }  else if (op == this.instruction['compare']) {
+                // compare a1 a2
+                this.pa_plus(3)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var v1 = this.register(r1)
+                var v2 = this.register(r2)
+                if (v1 < v2) {
+                    this.regs['c1'] = 1
+                } else if (v1 > v2){
+                    this.regs['c1'] = 2
+                } else if (v1 == v2){
+                    this.regs['c1'] = 3
+                } else {
+                    this.regs['c1'] = 0
+                }
+            } else if (op == this.instruction['jump_if_less']) {
+                // jump_if_less @label
+                var mem_low = this.memory[pa + 1]
+                var mem_high = this.memory[pa + 2]
+                var value = this.concat_number(mem_low, mem_high)
+                if (this.regs['c1'] == 1) {
+                    this.regs['pa'] = value
+                } else {
+                    this.pa_plus(3)
+                }
+            } else if (op == this.instruction['jump']) {
+                // jump @label
+                var value = this.concat_number(this.memory[pa + 1], this.memory[pa + 2])
+                this.pa_plus(3)
+                this.regs['pa'] = value
+            } else if (op == this.instruction['save_from_register']) {
+                // save_from_register a1 a2 ; low(a1)->address(a2)
+                this.pa_plus(3)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var address = this.register(r2)
+                var val = this.register(r1)
+                this.memory[address] = val & 255
+            } else if (op == this.instruction['set2']) {
+                // set2 a1 65535
+                this.pa_plus(4)
+                var reg = this.memory[pa + 1]
+                var low = this.memory[pa + 2]
+                var high = this.memory[pa + 3]
+                var val = this.concat_number(low, high)
+                this.set_register(reg, val)
+            } else if (op == this.instruction['load2']) {
+                // load2 @100 a1
+                this.pa_plus(4)
+                var reg = this.memory[pa + 3]
+                var mem = this.concat_number(this.memory[pa + 1], this.memory[pa + 2])
+                var val = this.concat_number(this.memory[mem], this.memory[mem + 1])
+                this.set_register(reg, val)
+            } else if (op == this.instruction['add2']) {
+                // add2 a1 a2 a3  ; a3 = a1 + a2
+                this.pa_plus(4)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var r3 = this.memory[pa + 3]
+                var val = this.register(r1) + this.register(r2)
+                this.set_register(r3, val)
+            } else if (op == this.instruction['save2']) {
+                // save2 a1 @100
+                this.pa_plus(4)
+                var reg = this.memory[pa + 1]
+                var mem = this.concat_number(this.memory[pa + 2], this.memory[pa + 3])
+                var val_low = asm.getNumberLow(this.register(reg))
+                var val_high = asm.getNumberHigh(this.register(reg))
+                this.memory[mem] = val_low
+                this.memory[mem + 1] = val_high
+                if (mem == 65534) {
+                    log('reg{} = {}'.format(reg, this.concat_number(this.memory[mem], this.memory[mem+1])))
+                }
+            }  else if (op == this.instruction['subtract2']) {
+                // subtract2 a1 a2 a3  ; a3 = a1 - a2
+                this.pa_plus(4)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var r3 = this.memory[pa + 3]
+                var val = this.register(r1) - this.register(r2)
+                this.set_register(r3, val)
+            }  else if (op == this.instruction['load_from_register']) {
+                // load_from_register a1 a2  ; address(r1)->r2
+                this.pa_plus(3)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var address = this.register(r1)
+                var val = this.memory[address]
+                this.set_register(r2, val)
+            } else if (op == this.instruction['load_from_register2']) {
+                // load_from_register2 a1 a2  ; address(r1)->r2
+                this.pa_plus(3)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var address = this.register(r1)
+                var val = this.concat_number(this.memory[address], this.memory[address + 1])
+                this.set_register(r2, val)
+            } else if (op == this.instruction['save_from_register2']) {
+                // save_from_register a1 a2 ; low(a1)->address(a2)
+                this.pa_plus(3)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var address = this.register(r2)
+                var val = this.register(r1)
+                var low = val & 255
+                var high = val >> 8
+                this.memory[address] = low
+                this.memory[address + 1] = high
+            } else if (op == this.instruction['jump_from_register']) {
+                var reg = this.memory[pa + 1]
+                this.regs['pa'] = this.register(reg)
+            } else if (op == this.instruction['shift_right']) {
+                this.pa_plus(4)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var r3 = this.memory[pa + 3]
+                var v1 = this.register(r1)
+                var v2 = this.register(r2)
+                this.set_register(r3, v1 >> v2)
+            }  else if (op == this.instruction['and']) {
+                this.pa_plus(4)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var r3 = this.memory[pa + 3]
+                var v1 = this.register(r1)
+                var v2 = this.register(r2)
+                this.set_register(r3, v1 & v2)
+            }  else if (op == this.instruction['multiply2']) {
+                this.pa_plus(4)
+                var r1 = this.memory[pa + 1]
+                var r2 = this.memory[pa + 2]
+                var r3 = this.memory[pa + 3]
+                var val = this.register(r1) * this.register(r2)
+                this.set_register(r3, val)
+            } else if (op == this.instruction['jump_if_equal']) {
+                // jump_if_equal @label
+                var mem_low = this.memory[pa + 1]
+                var mem_high = this.memory[pa + 2]
+                var value = this.concat_number(mem_low, mem_high)
+                if (this.regs['c1'] == 3) {
+                    this.regs['pa'] = value
+                } else {
+                    this.pa_plus(3)
+                }
+            } else {
+                log('address {} operation \'{}\' not exist '.format(pa, op))
+                return
+            }
+        }
+    }
+}
+
+const pointFromIndex = function(index, memory) {
+    var x = int(index / 100)
+    var y = index % 100
+    var w = 1
+    var h = 1
+    index = index + 30000
+    var num = memory[index]
+
+    var r = ((num & 0b11000000) >> 6) * 85
+    var g = ((num & 0b00110000) >> 4) * 85
+    var b = ((num & 0b00001100) >> 2) * 85
+    var a = (num & 0b00000011) * 85
+
+    return [x, y, w, h, r, g, b, a]
+}
+
+const drawPoint = function(point) {
+    var pixelSize = config:pixelSize
+    var p = point
+    var x = p[0] * pixelSize
+    var y = p[1] * pixelSize
+    var w = p[2] * pixelSize
+    var h = p[3] * pixelSize
+
+    var r = p[4]
+    var g = p[5]
+    var b = p[6]
+    var a = p[7]
+
+    GuaCanvas.rect(x, y, w, h, r, g, b, a)
+}
+
+const __main = function() {
+    var w = 500
+    var h = 500
+
+    GuaCanvas.init(w, h)
+
+    var code = stringFromFile('main8.a16')
+    const mc = asm.machine_code(code)
+    // log(mc)
+    var len = mc.length()
+    const cpu = AxePU.new(mc)
+    cpu.run()
+    
+    // var points = []
+    // while (GuaCanvas.running()) {
+    //     GuaCanvas.updateEvents()
+
+    //     GuaCanvas.clear()
+
+    //     // 随机增加一个点
+    //     for (var i = 0; i < 10000; i += 1) {
+    //         var p = pointFromIndex(i, cpu.memory)
+    //         points.add(p)
+    //     }
+
+    //     // 画出所有点
+    //     for (var i = 0; i < points.length(); i += 1) {
+    //         var p = points[i]
+    //         drawPoint(p)
+    //     }
+
+    //     GuaCanvas.show()
+    // }
+}
+
+
+__main()

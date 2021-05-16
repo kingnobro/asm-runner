@@ -1,0 +1,265 @@
+.function length:2 s:2
+    .var len 0
+    .var delta 1
+    .var2 address
+
+    @function_length_while
+
+        .add2 s len address
+
+        ; a3 = address
+        set2 a3 2
+        subtract2 f1 a3 a3
+        load_from_register2 a3 a3
+
+        ; 把 base 中的值读出来
+        load_from_register a3 a3
+
+        ; 判断是否为字符串终结符
+        set2 a2 0
+        compare a2 a3
+        jump_if_equal @function_length_end
+
+        ; 参数更新
+        .add2 len delta len
+        jump @function_length_while
+    
+    @function_length_end
+        .return len
+.function_end
+
+
+.function find:2 s:2 c:1
+    .var len 0
+    .var delta 1
+    .var2 address
+
+    @function_find_while
+        .add2 s len address
+
+        ; a3 = address
+        set2 a3 2
+        subtract2 f1 a3 a3
+        load_from_register2 a3 a3
+
+        ; 把 base 中的字符读出来
+        load_from_register a3 a3
+
+        ; 把要 find 的字符读出来
+        set2 a2 5
+        subtract2 f1 a2 a2
+        load_from_register a2 a2
+
+        ; 判断是否相等
+        compare a2 a3
+        jump_if_equal @function_find_end
+
+        ; 判断是否为字符串终结符
+        set2 a2 0
+        compare a2 a3
+        jump_if_equal @function_find_notfound
+
+        ; 参数更新
+        .add2 len delta len
+        jump @function_find_while
+    
+    @function_find_notfound
+        ; 把 len 设置为 255 表示没有找到
+        set2 a2 255
+        set2 a3 4
+        subtract2 f1 a3 a3
+        save_from_register a2 a3
+    @function_find_end
+        .return len
+.function_end
+
+
+; 相等返回 0
+; 不相等返回 1
+.function equal:1 s1:2 s2:2
+    ; s1 和 s2 已经是地址了, 不需要再使用 &
+    .call length s1
+    .return_value len1
+    .call length s2
+    .return_value len2
+
+    .var delta 1
+    .var isEqual 0
+    .var index 0
+    .var2 address1
+    .var2 address2
+
+    .if len1 == len2 {
+        @equal_jump
+        .while index < len1 {
+            ; 避免让伪指令影响寄存器的值
+            .add2 s1 index address1
+            .add2 s2 index address2
+
+            ; a3 = address1
+            set2 a3 4
+            subtract2 f1 a3 a3
+            load_from_register2 a3 a3
+
+            ; 把 address1 中的值读出来
+            load_from_register a3 a3
+
+            ; a2 = address2
+            set2 a2 2
+            subtract2 f1 a2 a2
+            load_from_register2 a2 a2
+
+            ; 把 address 中的值读出来
+            load_from_register a2 a2
+
+            compare a2 a3
+            ; 必须在这里加 否则会影响 a2 a3
+            .add2 index delta index
+
+            jump_if_equal @equal_jump
+
+            ; 字符不相等, 把 isEqual 设置为 1
+            set2 a2 1
+            set2 a3 6
+            subtract2 f1 a3 a3
+            save_from_register a2 a3
+        }
+    } .else {
+        ; 长度不相等, 把 isEqual 设置为 1
+        set2 a2 1
+        set2 a3 6
+        subtract2 f1 a3 a3
+        save_from_register a2 a3
+    }
+    .return isEqual
+.function_end
+
+
+; 大写字母 1-26
+; 小写字母 = 大写字母 + 26
+; s1 和 s2 等长
+.function lower:0 s1:2 s2:2
+    .call length s1
+    .return_value len
+    .var index 0
+    .var2 address1
+    .var2 address2
+    .var char
+    .var lowerBound 0
+    .var upperBound 27
+    .var convertDelta 26
+    .var indexDelta 1
+
+    .while index < len {
+        ; 读取当前位置的字符到 char 中
+        .add2 s1 index address1
+        .add2 s2 index address2
+
+        ; a3 = address1
+        set2 a3 9
+        subtract2 f1 a3 a3
+        load_from_register2 a3 a3
+
+        ; a2 = char
+        set2 a2 5
+        subtract2 f1 a2 a2
+
+        ; 把 address1 中的值读出来存到 char 中
+        load_from_register a3 a3
+        save_from_register a3 a2
+
+        .if char < upperBound {
+            .if lowerBound < char {
+               .add2 char convertDelta char
+            }
+        }
+
+        ; a3 = char
+        set2 a3 5
+        subtract2 f1 a3 a3
+        load_from_register a3 a3
+
+        ; a2 = address2
+        set2 a2 7
+        subtract2 f1 a2 a2
+        load_from_register2 a2 a2
+
+        ; 把 char 中的值读出来存到 address2 中
+        save_from_register a3 a2
+
+        ; a2 = address2
+        set2 a2 7
+        subtract2 f1 a2 a2
+        load_from_register2 a2 a2
+
+        ; 把 address 中的值读出来
+        load_from_register a2 a2
+
+        .add2 index indexDelta index
+    }
+    .return
+.function_end
+
+
+; 大写字母 = 小写字母 - 26
+.function upper:0 s1:2 s2:2
+    .call length s1
+    .return_value len
+    .var index 0
+    .var2 address1
+    .var2 address2
+    .var char
+    .var lowerBound 26
+    .var upperBound 53
+    .var convertDelta 26
+    .var indexDelta 1
+
+    .while index < len {
+        ; 读取当前位置的字符到 char 中
+        .add2 s1 index address1
+        .add2 s2 index address2
+
+        ; a3 = address1
+        set2 a3 9
+        subtract2 f1 a3 a3
+        load_from_register2 a3 a3
+
+        ; a2 = char
+        set2 a2 5
+        subtract2 f1 a2 a2
+
+        ; 把 address1 中的值读出来存到 char 中
+        load_from_register a3 a3
+        save_from_register a3 a2
+
+        .if char < upperBound {
+            .if lowerBound < char {
+               .subtract2 char convertDelta char
+            }
+        }
+
+        ; a3 = char
+        set2 a3 5
+        subtract2 f1 a3 a3
+        load_from_register a3 a3
+
+        ; a2 = address2
+        set2 a2 7
+        subtract2 f1 a2 a2
+        load_from_register2 a2 a2
+
+        ; 把 char 中的值读出来存到 address2 中
+        save_from_register a3 a2
+
+        ; a2 = address2
+        set2 a2 7
+        subtract2 f1 a2 a2
+        load_from_register2 a2 a2
+
+        ; 把 address 中的值读出来
+        load_from_register a2 a2
+
+        .add2 index indexDelta index
+    }
+    .return
+.function_end
